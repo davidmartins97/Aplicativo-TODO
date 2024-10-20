@@ -1,39 +1,50 @@
-import React, { useState, useRef } from 'react'
-import { Button, Checkbox, TextField, Grid2, List, ListItem, ListItemText, IconButton, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Stack } from '@mui/material'
+import React, { useState, useRef, useEffect } from 'react'
+import {
+  Button, Checkbox, TextField, Grid2, List, ListItem, ListItemText, IconButton, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Stack,
+  AppBar,
+  Toolbar,
+  Typography,
+  Grow
+} from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 } from 'uuid'
 
+
+
 function App() {
-  const valorInicial = []
-  const [task, setTask] = useState(valorInicial)
+  const [task, setTask] = useState(() => {
+    const savedTasks = localStorage.getItem('tasks')
+    return savedTasks ? JSON.parse(savedTasks) : []
+  })
   const [input, setInput] = useState('')
   const inputElement = useRef()
   const [open, setOpen] = useState(false);
   const [toDelete, setToDelete] = useState({ id: null, text: null, checked: null });
 
-
-
   function handleClick() {
-    input && task.text !== '' && setTask(
-      [...task,
-      {
-        id: v4(),
-        text: input,
-        checked: false
-      }
-      ]
-    );
-    setInput('');
-    console.log(task)
-    inputElement.current.focus()
+    if (input.trim() !== '') {
+
+      const updatedTask =
+        [...task,
+        {
+          id: v4(),
+          text: input,
+          checked: false
+        }]
+      setTask(updatedTask)
+      localStorage.setItem('tasks', JSON.stringify(updatedTask))
+      setInput('');
+      console.log(task)
+      inputElement.current.focus()
+    }
   }
 
   const handleDelete = (toDelete: any) => {
     const updatedTask = task.filter((item) => item.id !== toDelete.id);
     setTask(updatedTask);
+    localStorage.setItem('tasks', JSON.stringify(updatedTask));
     setOpen(false)
     inputElement.current.focus()
-
   }
 
   const handleEnter = (event: React.KeyboardEvent) => {
@@ -43,41 +54,50 @@ function App() {
     }
   }
 
+
   const handleOpenDialog = (item: any) => {
     setToDelete(item);
     setOpen(true);
   };
 
   const handleToggle = (toChange: any) => {
-    setTask((task) => task.map((item) =>
+    const updatedTask = task.map((item) =>
       item.id === toChange ?
         { ...item, checked: !item.checked }
         : item
-    )
     );
-  }
-  const handleCheck = () => {
-    
+    setTask(updatedTask)
+    localStorage.setItem('tasks', JSON.stringify(updatedTask))
   }
 
 
 
   return (
     <>
+      <AppBar color='primary' sx={{ marginBottom: '1px' }}>
+        <Toolbar>
+          <Typography
+            variant='h6'
+            sx={{
+              letterSpacing: '.3rem',
+              color: 'inherit',
+              flexGrow: '1'
+            }}
+          >TODO App</Typography>
+        </Toolbar>
+      </AppBar>
       <div>
-        <Stack flex='1' sx={{
-          width: '100%',
+        <Stack flex='0' width={{ md: '600px', sm: '500px', xs: '90vw' }} sx={{
           justifyContent: "center",
         }}>
-          
-          <List sx={{  bgcolor: 'background', flexWrap: 'wrap'}}>
+          <List sx={{ bgcolor: 'background', flexWrap: 'wrap', }}>
             {task.map((item) => (
               <ListItem
-                sx={{border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
+                sx={{ border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
                 key={item.id}
                 secondaryAction={
                   <IconButton disabled={item.checked ? true : false} edge="end" aria-label="delete" onClick={() => handleOpenDialog(item)}>
-                    <DeleteIcon sx={{color: item.checked ? 'grey' : '#3f50b5'}}/>
+                    <DeleteIcon sx={{ color: item.checked ? 'grey' : '#3f50b5' }} />
                   </IconButton>
                 }
               >
@@ -87,40 +107,45 @@ function App() {
                   checked={item.checked}
                   onChange={() => handleToggle(item.id)}
                 />
-                <ListItemText sx={{color: item.checked ? 'grey' : 'black'}} id={item.id} primary={item.text} />
+                <ListItemText sx={{ color: item.checked ? 'grey' : 'black', wordBreak: 'break-word' }} id={item.id} primary={item.text} />
               </ListItem>
             ))}
           </List>
-          </Stack>
-          <Stack alignItems='flex-end' margin='20px'>
+        </Stack>
+        <Stack alignSelf='flex-end' margin={{ xs: '10px', sm: '20px' }}
+          sx={{
+            justifyContent: "center",
+          }}>
           <TextField fullWidth label="Escreva a tarefa aqui" variant="outlined" inputRef={inputElement} value={input}
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
               setInput(event.target.value);
             }} onKeyDown={handleEnter}
           />
-          <Button fullWidth variant="contained" color='success' onClick={handleClick} sx={{ marginTop: '10px'}}>
+          <Button fullWidth variant="contained" color='success' onClick={handleClick} sx={{ marginTop: '10px' }}>
             Criar tarefa
           </Button>
-          </Stack>
-        
-        
+        </Stack>
+
+
       </div>
       <div>
         <Dialog
           open={open}
           onClose={() => setOpen(false)}
+          color='success'
+          sx={{ borderRadius: '4px', }}
         >
           <DialogTitle id={toDelete.id}>
             {"Deletar a seguinte tarefa?"}
           </DialogTitle>
           <DialogContent>
-            <DialogContentText id={toDelete.id}>
+            <DialogContentText sx={{ wordBreak: 'break-word' }} id={toDelete.id}>
               {toDelete.text}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpen(false)}>Não</Button>
-            <Button onClick={() => handleDelete(toDelete)} autoFocus>
+            <Button onClick={() => handleDelete(toDelete)} color='error' >
               Sim
             </Button>
           </DialogActions>
