@@ -8,6 +8,7 @@ import {
 } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 } from 'uuid'
+import Header from './components/Header'
 
 
 
@@ -74,19 +75,9 @@ function App() {
 
   return (
     <>
-      <AppBar color='primary' sx={{ marginBottom: '1px' }}>
-        <Toolbar>
-          <Typography
-            variant='h6'
-            sx={{
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              flexGrow: '1'
-            }}
-          >TODO App</Typography>
-        </Toolbar>
-      </AppBar>
-      <div>
+    <main>
+      <Header />
+      <>
         <Stack flex='0' width={{ md: '600px', sm: '500px', xs: '90vw' }} sx={{
           justifyContent: "center",
         }}>
@@ -127,8 +118,8 @@ function App() {
         </Stack>
 
 
-      </div>
-      <div>
+      </>
+      <>
         <Dialog
           open={open}
           onClose={() => setOpen(false)}
@@ -150,7 +141,8 @@ function App() {
             </Button>
           </DialogActions>
         </Dialog>
-      </div>
+      </>
+      </main>
     </>
   )
 }
