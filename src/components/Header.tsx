@@ -4,7 +4,8 @@ const Header = () => {
     return <AppBar component="header" color='primary' sx={{ marginBottom: '1px' }}>
         <Toolbar>
           <Typography
-            variant='h6'
+            // fontFamily="Avant Garde"
+            variant='h5'
             sx={{
               letterSpacing: '.3rem',
               color: 'inherit',

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   Button, Checkbox, TextField, Grid2, List, ListItem, ListItemText, IconButton, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Stack,
   AppBar,
@@ -15,23 +15,32 @@ import {
   Fade,
   Zoom
 } from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete';
+// import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 } from 'uuid'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { TransitionGroup } from 'react-transition-group';
+import ConfirmDialog from './TasksComponents/Dialog';
+import TaskItem from './TasksComponents/ListItem';
+import TaskInput from './TasksComponents/TaskInput';
 
 
 
 function TaskList() {
-  const [task, setTask] = useState(() => {
+  interface Task {
+    id: string;
+    text: string;
+    checked: boolean;
+  }  
+
+  const [task, setTask] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem('tasks')
     return savedTasks ? JSON.parse(savedTasks) : []
   })
   const [input, setInput] = useState('')
-  const inputElement = useRef()
+  const inputElement = useRef<HTMLInputElement | null>(null)
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
-  const [toDelete, setToDelete] = useState({ id: null, text: null, checked: null });
+  const [toDelete, setToDelete] = useState<Task>({ id: '', text: '', checked: false });
 
   function handleClick() {
     if (input.trim() !== '') {
@@ -47,7 +56,7 @@ function TaskList() {
       localStorage.setItem('tasks', JSON.stringify(updatedTask))
       setInput('');
       console.log(task[1])
-      inputElement.current.focus()
+      inputElement.current?.focus()
     }
   }
 
@@ -56,15 +65,15 @@ function TaskList() {
     setTask(updatedTask);
     localStorage.setItem('tasks', JSON.stringify(updatedTask));
     setOpen(false)
-    inputElement.current.focus()
+    inputElement.current?.focus()
   }
 
-  const handleEnter = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleClick();
-    }
-  }
+  // const handleEnter = (event: React.KeyboardEvent) => {
+  //   if (event.key === 'Enter') {
+  //     event.preventDefault();
+  //     handleClick();
+  //   }
+  // }
 
 
   const handleOpenDialog = (item: any) => {
@@ -101,23 +110,13 @@ function TaskList() {
                 <TransitionGroup>
                 {task.map((item) => (
                   <Collapse>
-                  <ListItem
-                    sx={{ border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
+                  <TaskItem
                     key={item.id}
-                    secondaryAction={
-                      <IconButton disabled={item.checked ? true : false} edge="end" aria-label="delete" onClick={() => handleOpenDialog(item)}>
-                        <DeleteIcon sx={{ color: item.checked ? 'grey' : '#3f50b5' }} />
-                      </IconButton>
-                    }
-                  >
-
-                    <Checkbox
-                      edge="start"
-                      checked={item.checked}
-                      onChange={() => handleToggle(item.id)}
-                    />
-                    <ListItemText sx={{ color: item.checked ? 'grey' : 'black', wordBreak: 'break-word' }} id={item.id} primary={item.text} />
-                  </ListItem>
+                    task={item}
+                    onToggle={handleToggle}
+                    onDelete={handleOpenDialog}
+                    inside={false}
+                  />
                   </Collapse>
                 ))}
                 </TransitionGroup>
@@ -130,23 +129,13 @@ function TaskList() {
               {task.filter(item => { return (item.checked == false)})
                .map((item) => (
                 <Collapse>
-                <ListItem
-                  sx={{ border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
-                  key={item.id}
-                  secondaryAction={
-                    <IconButton disabled={item.checked ? true : false} edge="end" aria-label="delete" onClick={() => handleOpenDialog(item)}>
-                      <DeleteIcon sx={{ color: item.checked ? 'grey' : '#3f50b5' }} />
-                    </IconButton>
-                  }
-                >
-
-                  <Checkbox
-                    edge="start"
-                    checked={item.checked}
-                    onChange={() => handleToggle(item.id)}
+                <TaskItem
+                    key={item.id}
+                    task={item}
+                    onToggle={handleToggle}
+                    onDelete={handleOpenDialog}
+                    inside={false}
                   />
-                  <ListItemText sx={{ color: item.checked ? 'grey' : 'black', wordBreak: 'break-word' }} id={item.id} primary={item.text} />
-                </ListItem>
                 </Collapse>
               ))}
               </TransitionGroup>
@@ -164,18 +153,13 @@ function TaskList() {
               {task.filter(item => { return (item.checked == true)})
                .map((item) => (
                 <Collapse>
-                <ListItem
-                  sx={{ border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
-                  key={item.id}
-                >
-
-                  <Checkbox
-                    edge="start"
-                    checked={item.checked}
-                    onChange={() => handleToggle(item.id)}
+                  <TaskItem
+                    key={item.id}
+                    task={item}
+                    onToggle={handleToggle}
+                    onDelete={handleOpenDialog}
+                    inside={true}
                   />
-                  <ListItemText sx={{ color: item.checked ? 'grey' : 'black', wordBreak: 'break-word' }} id={item.id} primary={item.text} />
-                </ListItem>
                 </Collapse>
               ))}
               </TransitionGroup>
@@ -185,45 +169,18 @@ function TaskList() {
             </>
             }
           </Stack>
-          <Box alignSelf='flex-end' margin={{ xs: '10px', sm: '20px' }} width={{ md: '500px', sm: '400px', xs: '80vw' }}
-            sx={{
-              justifyContent: "center",
-            }}>
-            <TextField fullWidth label="Escreva a tarefa aqui" variant="outlined" inputRef={inputElement} value={input}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-                setInput(event.target.value);
-              }} onKeyDown={handleEnter}
-            />
-            <Button fullWidth variant="contained" color='success' onClick={handleClick} sx={{ marginTop: '10px' }}>
-              Criar tarefa
-            </Button>
-          </Box>
+          <TaskInput
+            input={input}
+            onInputChange={setInput}
+            onAddTask={handleClick}
+          />
         </>
-        <>
-          <Dialog
-            TransitionComponent={Grow} // Adicionando a transição
-            transitionDuration={{ enter: 300, exit: 200 }} // Tempo da transição
-            open={open}
-            onClose={() => setOpen(false)}
-            color='success'
-            sx={{ borderRadius: '4px', }}
-          >
-            <DialogTitle id={toDelete.id}>
-              {"Deletar a seguinte tarefa?"}
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText sx={{ wordBreak: 'break-word' }} id={toDelete.id}>
-                {toDelete.text}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpen(false)}>Não</Button>
-              <Button onClick={() => handleDelete(toDelete)} color='error' >
-                Sim
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </>
+        <ConfirmDialog
+          open={open}
+          onClose={() => setOpen(false)}
+          onConfirm={() => handleDelete(toDelete)}
+          text={toDelete.text}
+        />
       </Box> 
     </>
   )
