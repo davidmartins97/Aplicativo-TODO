@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography, } from "@mui/material"
 
 const Header = () => {
-    return <AppBar color='primary' sx={{ marginBottom: '1px' }}>
+    return <AppBar component="header" color='primary' sx={{ marginBottom: '1px' }}>
         <Toolbar>
           <Typography
             variant='h6'
