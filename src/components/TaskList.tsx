@@ -1,21 +1,19 @@
 import React, { useState, useRef } from 'react'
 import {
-  Button, Checkbox, TextField, Grid2, List, ListItem, ListItemText, IconButton, Modal, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Stack,
-  AppBar,
-  Toolbar,
+  List,
+  Stack,
   Typography,
-  Grow,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   Switch,
-  Box, 
+  Box,
   Collapse,
   FormControlLabel,
-  Fade,
-  Zoom
+  IconButton,
+  AccordionActions,
 } from '@mui/material'
-// import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { v4 } from 'uuid'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { TransitionGroup } from 'react-transition-group';
@@ -30,7 +28,7 @@ function TaskList() {
     id: string;
     text: string;
     checked: boolean;
-  }  
+  }
 
   const [task, setTask] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem('tasks')
@@ -60,7 +58,7 @@ function TaskList() {
     }
   }
 
-  const handleDelete = (toDelete: any) => {
+  const handleDelete = (toDelete: Task) => {
     const updatedTask = task.filter((item) => item.id !== toDelete.id);
     setTask(updatedTask);
     localStorage.setItem('tasks', JSON.stringify(updatedTask));
@@ -68,22 +66,15 @@ function TaskList() {
     inputElement.current?.focus()
   }
 
-  // const handleEnter = (event: React.KeyboardEvent) => {
-  //   if (event.key === 'Enter') {
-  //     event.preventDefault();
-  //     handleClick();
-  //   }
-  // }
 
-
-  const handleOpenDialog = (item: any) => {
+  const handleOpenDialog = (item: Task) => {
     setToDelete(item);
     setOpen(true);
   };
 
-  const handleToggle = (toChange: any) => {
+  const handleToggle = (toChange: Task) => {
     const updatedTask = task.map((item) =>
-      item.id === toChange ?
+      item.id === toChange.id ?
         { ...item, checked: !item.checked }
         : item
     );
@@ -101,72 +92,81 @@ function TaskList() {
         placeItems: 'center',
       }}>
         <>
-          <Stack flex='0' width={{ md: '600px', sm: '500px', xs: '90vw' }} paddingTop={{md: '64px', sm: '64px', xs: '60px'}} sx={{
+          <Stack flex='0' width={{ md: '600px', sm: '500px', xs: '90vw' }} paddingTop={{ md: '64px', sm: '64px', xs: '60px' }} sx={{
             justifyContent: "center",
           }}>
-            <FormControlLabel sx={{color: '#444', fontSize: '1.5rem', padding: 'none'}} control={<Switch size='small' checked={done} onChange={handleSwitch}/>} label={done ? 'exibindo concluídas' : 'ocultando concluidas'}/>
+            <FormControlLabel sx={{ color: '#444', fontSize: '1.5rem', padding: 'none', width: '200px' }} control={<Switch size='small' checked={done} onChange={handleSwitch} />} label={done ? 'exibindo concluídas' : 'ocultando concluidas'} />
             {done ?
               <List sx={{ bgcolor: 'background', flexWrap: 'wrap', }}>
                 <TransitionGroup>
-                {task.map((item) => (
-                  <Collapse>
-                  <TaskItem
-                    key={item.id}
-                    task={item}
-                    onToggle={handleToggle}
-                    onDelete={handleOpenDialog}
-                    inside={false}
-                  />
-                  </Collapse>
-                ))}
+                  {task.map((item) => (
+                    <Collapse>
+                      <TaskItem
+                        key={item.id}
+                        task={item}
+                        onToggle={handleToggle}
+                        onDelete={handleOpenDialog}
+                        inside={false}
+                      />
+                    </Collapse>
+                  ))}
                 </TransitionGroup>
               </List>
 
               :
               <>
-              <List sx={{ bgcolor: 'background', flexWrap: 'wrap', }}>
-              <TransitionGroup>
-              {task.filter(item => { return (item.checked == false)})
-               .map((item) => (
-                <Collapse>
-                <TaskItem
-                    key={item.id}
-                    task={item}
-                    onToggle={handleToggle}
-                    onDelete={handleOpenDialog}
-                    inside={false}
-                  />
-                </Collapse>
-              ))}
-              </TransitionGroup>
-              </List>
-              {
-              task.some(item => item.checked == true) &&
-              <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-              >
-              <Typography>Tarefas concluídas</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-              <TransitionGroup>
-              {task.filter(item => { return (item.checked == true)})
-               .map((item) => (
-                <Collapse>
-                  <TaskItem
-                    key={item.id}
-                    task={item}
-                    onToggle={handleToggle}
-                    onDelete={handleOpenDialog}
-                    inside={true}
-                  />
-                </Collapse>
-              ))}
-              </TransitionGroup>
-              </AccordionDetails>
-            </Accordion>
-            }
-            </>
+                <List sx={{ bgcolor: 'background', flexWrap: 'wrap', }}>
+                  <TransitionGroup>
+                    {task.filter(item => { return (item.checked == false) })
+                      .map((item) => (
+                        <Collapse>
+                          <TaskItem
+                            key={item.id}
+                            task={item}
+                            onToggle={handleToggle}
+                            onDelete={handleOpenDialog}
+                            inside={false}
+                          />
+                        </Collapse>
+                      ))}
+                  </TransitionGroup>
+                </List>
+                {
+                  task.some(item => item.checked == true) &&
+                  <Accordion>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      id='accordionDone'
+                      aria-controls='accordionDone'
+                    >
+                      <Typography>Tarefas concluídas</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <TransitionGroup>
+                        {task.filter(item => { return (item.checked == true) })
+                          .map((item) => (
+                            <Collapse>
+                              <TaskItem
+                                key={item.id}
+                                task={item}
+                                onToggle={handleToggle}
+                                onDelete={handleOpenDialog}
+                                inside={true}
+                              />
+                            </Collapse>
+                          ))}
+                      </TransitionGroup>
+                    </AccordionDetails>
+                    <AccordionActions>
+                      <IconButton
+                       aria-label="deleteDone"
+                      >
+                        <DeleteIcon sx={{ color: '#3f50b5' }} />
+                      </IconButton>
+                    </AccordionActions>
+                  </Accordion>
+                }
+              </>
             }
           </Stack>
           <TaskInput
@@ -181,7 +181,7 @@ function TaskList() {
           onConfirm={() => handleDelete(toDelete)}
           text={toDelete.text}
         />
-      </Box> 
+      </Box>
     </>
   )
 }

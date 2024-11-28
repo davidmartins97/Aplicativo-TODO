@@ -4,7 +4,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 interface TaskItemProps {
   task: { id: string; text: string; checked: boolean };
-  onToggle: (id: string) => void;
+  onToggle: (task: { id: string; text: string; checked: boolean }) => void;
   onDelete: (task: { id: string; text: string; checked: boolean }) => void;
   inside: boolean;  //se o elemento estiver dentro de um bloco a açao secundária é desabilitada
 }
@@ -14,9 +14,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, inside })
     <ListItem
       sx={{ border: '#3f50b5 1px', borderRadius: '4px', marginBottom: '2px' }}
       secondaryAction={
-        inside ? 
-        null
-        :
+        !inside && 
         <IconButton
           disabled={task.checked}
           edge="end"
@@ -30,7 +28,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, inside })
       <Checkbox
         edge="start"
         checked={task.checked}
-        onChange={() => onToggle(task.id)}
+        onChange={() => onToggle(task)}
       />
       <ListItemText
         sx={{
