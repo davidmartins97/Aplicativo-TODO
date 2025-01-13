@@ -97,7 +97,7 @@ function TaskList() {
           }}>
             <FormControlLabel sx={{ color: '#444', fontSize: '1.5rem', padding: 'none', width: '200px' }} control={<Switch size='small' checked={done} onChange={handleSwitch} />} label={done ? 'exibindo concluídas' : 'ocultando concluidas'} />
             {done ?
-              <List sx={{ bgcolor: 'background', flexWrap: 'wrap', }}>
+              <List sx={{ bgcolor: 'background', flexWrap: 'wrap' }}>
                 <TransitionGroup>
                   {task.map((item) => (
                     <Collapse>
