@@ -33,7 +33,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, inside, }
         sx={{
           '&:hover': { bgcolor: '#ebf1f5' },
           '&:hover + .list-item-text': {
-            textDecoration: task.checked ? 'none' : 'underline grey',
+            textShadow: task.checked ? 'none' : '#1976d2 1px 0px 4px',
           },
         }}
       />
@@ -42,7 +42,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete, inside, }
         sx={{
           color: task.checked ? 'grey' : 'black',
           wordBreak: 'break-word',
-          '&:hover': { textDecoration: task.checked ? 'none' : 'underline grey' },
+          '&:hover': { textShadow: task.checked ? 'none' : '#1976d2 1px 0px 4px' },
         }}
         primary={task.text}
       />
